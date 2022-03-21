@@ -15,7 +15,7 @@ run the server with
 
 changes are mostly applied automatically
 
-### dependancies:
+### dependencies:
  - Node >= 14.0.0 and npm >= 5.6
  - python
  - django
