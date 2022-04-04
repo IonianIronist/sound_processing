@@ -30,55 +30,54 @@ changes are mostly applied automatically
 
 ## instruction for winboz users
 
-`
-choco install nvs
 
-nvs add 17.4.0
+    choco install nvs
 
-nvs use 17
+    nvs add 17.4.0
 
-git clone https://github.com/IonianIronist/sound_processing
+    nvs use 17
 
-cd sound_processing
+    git clone https://github.com/IonianIronist/sound_processing
 
-cd frontend
+    cd sound_processing
 
-npm install
-`
+    cd frontend
+
+    npm install
+
 
 go to root project dir
 
-`
 
-py -m venv ./env
 
-./env/Scripts/activate
+    py -m venv ./env
 
-pip install ./backend/dependencies
+    ./env/Scripts/activate
 
-cd backend
+    pip install ./backend/dependencies
 
-mkdir media && make dir build
+    cd backend
 
-`
+    mkdir media && make dir build
+
+
 
 from the frontend dir
 
-`
 
-npm run build
 
-`
+    npm run build
+
+
 
 copy the build dir contents to backend/build
 
 from the backend dir run:
 
-`
 
-py manage.py runserver
+    py manage.py runserver
 
-`
+
 
 
 
