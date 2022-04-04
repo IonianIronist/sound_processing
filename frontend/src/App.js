@@ -24,6 +24,7 @@ class Recorder extends React.Component{
             recording : 0,
             button_value : {0: 'record', 1 : 'stop recording'},
             chunks : [],
+            binary_audio : []
         };
         this.handleRecord = this.handleRecord.bind(this);
         this.addChunk = this.addChunk.bind(this);
@@ -37,6 +38,15 @@ class Recorder extends React.Component{
                     navigator.mediaDevices.getUserMedia({audio: true})
                     .then(stream => {
                         this.recorder = new MediaRecorder(stream);
+                        this.audioCtx = new AudioContext();
+                        this.analyzer = this.audioCtx.createAnalyser();
+                        this.src = this.audioCtx.createMediaStreamSource(stream);
+                        this.src.connect(this.analyzer);
+                        this.analyzer.fftSize = 2048;
+                        this.buffer_length = this.analyzer.frequencyBinCount;
+                        this.data_array = new Uint8Array(this.buffer_length);
+                        this.analyzer.getByteTimeDomainData(this.data_array);
+                        console.log(this.data_array);
                         this.recorder.ondataavailable = (e) => this.addChunk(e);
                         this.recorder.onstop = (e) => this.finishRecording(e);
                         this.recorder.start();
