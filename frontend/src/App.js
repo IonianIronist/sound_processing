@@ -1,5 +1,6 @@
 import {
-    Box, Button, Typography, CssBaseline, ThemeProvider, createTheme
+    Box, Button, Typography, CssBaseline, ThemeProvider, createTheme,
+    Stack
 }from "@mui/material";
 import React from 'react'
 
@@ -12,6 +13,7 @@ const theme = createTheme({
             main: "#E5E9F0"
         },
     },
+    margin: '2em'
 });
 
 
@@ -87,7 +89,8 @@ class App extends React.Component {
         this.state = {
             src: ''
         }
-        this.token = document.getElementsByName("csrfmiddlewaretoken")[0].value;
+
+        this.token = document.getElementsByName("csrfmiddlewaretoken")[0]?.value;
 
         this.onSaveClip = this.onSaveClip.bind(this);
         this.onProcessRequest = this.onProcessRequest.bind(this);
@@ -125,10 +128,10 @@ class App extends React.Component {
                 <Box>
                     <Recorder saveClip={this.onSaveClip} />
                 </Box>
-                <Box flexDirection="column">
+                <Stack>
                     <audio controls src={this.state.src}/>
                     <Button variant="outlined" onClick={this.onProcessRequest}>Submit</Button>
-                </Box>
+                </Stack>
                 </Box>
             </ThemeProvider>
         );
