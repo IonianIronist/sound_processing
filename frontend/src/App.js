@@ -87,7 +87,10 @@ class App extends React.Component {
         this.state = {
             src: ''
         }
+        this.token = document.getElementsByName("csrfmiddlewaretoken")[0].value;
+
         this.onSaveClip = this.onSaveClip.bind(this);
+        this.onProcessRequest = this.onProcessRequest.bind(this);
     }
 
     onSaveClip(blob){
@@ -96,6 +99,17 @@ class App extends React.Component {
             src: URL.createObjectURL(blob),
         });
     }
+
+    onProcessRequest(){
+        const headers = new Headers({
+            'X-CSRFToken': this.token
+        });
+        fetch('/api/', {
+            method: 'POST',
+            headers: headers,
+            body: this.state.clip
+        })
+    } 
 
     render(){
         return (
@@ -111,7 +125,10 @@ class App extends React.Component {
                 <Box>
                     <Recorder saveClip={this.onSaveClip} />
                 </Box>
+                <Box flexDirection="column">
                     <audio controls src={this.state.src}/>
+                    <Button variant="outlined" onClick={this.onProcessRequest}>Submit</Button>
+                </Box>
                 </Box>
             </ThemeProvider>
         );
