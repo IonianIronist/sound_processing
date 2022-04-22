@@ -17,23 +17,67 @@ const theme = createTheme({
 });
 
 
+function Visualizer(props){
+
+    const canvasRef = React.useRef(null);
+    
+    const draw = (ctx) => {
+        ctx.fillStyle = '#2E3440'
+        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#E5E9F0';
+
+        const sliceWidth = ctx.canvas.width * 2.0 / 1024;
+        let x = 0;
+
+        ctx.beginPath();
+        for(var i = 0; i < 1024; i++) {
+            const v = props.data[i]/128.0;
+            const y = v * ctx.canvas.height/2;
+
+            if(i === 0)
+                ctx.moveTo(x, y);
+            else
+                ctx.lineTo(x, y);
+
+            x += sliceWidth;
+        }
+
+        ctx.lineTo(ctx.canvas.width, ctx.canvas.height/2);
+        ctx.stroke();
+        };
+    
+    React.useEffect(() => {
+        const canvas = canvasRef.current;
+        const context = canvas.getContext('2d');
+        draw(context);
+    }, [draw])
+
+    return(
+        <canvas ref={canvasRef}></canvas>
+    )
+}
+
+
 class Recorder extends React.Component{
     constructor(props){
         super(props);
         this.state = {
-            recording : 0,
+            recording : false,
             button_value : {0: 'record', 1 : 'stop recording'},
             chunks : [],
-            binary_audio : []
+            binary_audio : [],
+            data_array: []
         };
         this.handleRecord = this.handleRecord.bind(this);
         this.addChunk = this.addChunk.bind(this);
         this.finishRecording = this.finishRecording.bind(this);
+        this.displayAudio = this.displayAudio.bind(this);
     }
     
     componentDidUpdate(_, prevState){
         if(prevState.recording !== this.state.recording){
-            if(this.state.recording === 1){
+            if(this.state.recording){
                 if(navigator.mediaDevices){
                     navigator.mediaDevices.getUserMedia({audio: true})
                     .then(stream => {
@@ -44,9 +88,7 @@ class Recorder extends React.Component{
                         this.src.connect(this.analyzer);
                         this.analyzer.fftSize = 2048;
                         this.buffer_length = this.analyzer.frequencyBinCount;
-                        this.data_array = new Uint8Array(this.buffer_length);
-                        this.analyzer.getByteTimeDomainData(this.data_array);
-                        console.log(this.data_array);
+                        this.displayAudio();
                         this.recorder.ondataavailable = (e) => this.addChunk(e);
                         this.recorder.onstop = (e) => this.finishRecording(e);
                         this.recorder.start();
@@ -57,11 +99,20 @@ class Recorder extends React.Component{
                     alert("Audio Recording Source Required.");
                 }
             }
-            else if(this.state.recording === 0){
+            else{
                 this.recorder.stop();
             }
         }
     }
+    
+    displayAudio(){
+        let data_array = new Uint8Array(this.buffer_length);
+        this.analyzer.getByteTimeDomainData(data_array);
+        this.setState({data_array: data_array})
+        if(this.state.recording){
+            setTimeout(this.displayAudio, 100);
+        }
+    }   
 
     addChunk(e){
         let new_chunks = [...this.state.chunks];
@@ -76,18 +127,24 @@ class Recorder extends React.Component{
     }
 
     handleRecord(){
-        this.setState(oldState => ({recording: (oldState.recording) ? 0 : 1}))
+        this.setState(oldState => ({recording: !oldState.recording}))
     }
 
 
     render(){
         return(
-            <Button 
-                variant="outlined"
-                onClick={this.handleRecord}
-            >
-                {this.state.button_value[this.state.recording]}
-            </Button>
+            <Box display='flex' flexDirection='column'>
+                <Button 
+                    variant="outlined"
+                    onClick={this.handleRecord}
+                >
+                    {(this.state.recording)? 'stop recording' : 'record'}
+                </Button>
+                {
+                    this.state.recording &&
+                    <Visualizer data={this.state.data_array}/>
+                }
+            </Box>
         )
     }
 }
